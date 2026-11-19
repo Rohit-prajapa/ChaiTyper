@@ -1,0 +1,455 @@
+
+@import "tailwindcss";
+
+/* ==========================================
+   CHAITYPER - GLOBAL THEME SYSTEM
+========================================== */
+
+:root {
+  color-scheme: dark;
+
+  --app-bg: #0b0b0b;
+  --card-bg: #151515;
+  --secondary-bg: #1b1b1b;
+  --tertiary-bg: #252525;
+
+  --border-color: #292929;
+
+  --text-primary: #ffffff;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+
+  --editor-bg: #171717;
+  --editor-text: #a1a1aa;
+
+  --input-bg: #1b1b1b;
+  --hover-bg: #252525;
+
+  --scrollbar-thumb: #555555;
+  --scrollbar-track: #0b0b0b;
+}
+
+/* LIGHT THEME */
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  --app-bg: #f8fafc;
+  --card-bg: #ffffff;
+  --secondary-bg: #f1f5f9;
+  --tertiary-bg: #e2e8f0;
+
+  --border-color: #e2e8f0;
+
+  --text-primary: #111827;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+
+  --editor-bg: #ffffff;
+  --editor-text: #334155;
+
+  --input-bg: #ffffff;
+  --hover-bg: #f1f5f9;
+
+  --scrollbar-thumb: #cbd5e1;
+  --scrollbar-track: #f8fafc;
+}
+
+/* ==========================================
+   BASE STYLES
+========================================== */
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background-color: var(--app-bg);
+  color: var(--text-primary);
+
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  overflow-x: hidden;
+
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+code,
+pre,
+.font-mono {
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    "JetBrains Mono",
+    "Fira Code",
+    Menlo,
+    Consolas,
+    monospace;
+}
+
+::selection {
+  background: rgba(249, 115, 22, 0.3);
+  color: inherit;
+}
+
+/* ==========================================
+   SMOOTH THEME TRANSITIONS
+========================================== */
+
+body,
+header,
+aside,
+main,
+section,
+article,
+input,
+select,
+textarea,
+button {
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+/* ==========================================
+   LIGHT THEME - MAIN BACKGROUNDS
+========================================== */
+
+[data-theme="light"] body,
+[data-theme="light"] #root {
+  background-color: var(--app-bg);
+  color: var(--text-primary);
+}
+
+/* Main application backgrounds */
+
+[data-theme="light"] [class~="bg-[#0b0b0b]"],
+[data-theme="light"] [class~="bg-[#111111]"] {
+  background-color: var(--app-bg) !important;
+}
+
+/* Cards and panels */
+
+[data-theme="light"] [class~="bg-[#151515]"],
+[data-theme="light"] [class~="bg-[#171717]"],
+[data-theme="light"] [class~="bg-[#1b1b1b]"],
+[data-theme="light"] [class~="bg-[#1c1c1c]"] {
+  background-color: var(--card-bg) !important;
+}
+
+/* Secondary surfaces */
+
+[data-theme="light"] [class~="bg-[#202020]"],
+[data-theme="light"] [class~="bg-[#252525]"],
+[data-theme="light"] [class~="bg-[#292929]"] {
+  background-color: var(--secondary-bg) !important;
+}
+
+/* Standard Tailwind backgrounds */
+
+[data-theme="light"] .bg-black,
+[data-theme="light"] .bg-gray-950,
+[data-theme="light"] .bg-gray-900 {
+  background-color: var(--app-bg) !important;
+}
+
+/* ==========================================
+   LIGHT THEME - BORDERS
+========================================== */
+
+[data-theme="light"] [class~="border-[#262626]"],
+[data-theme="light"] [class~="border-[#292929]"],
+[data-theme="light"] [class~="border-[#333]"] {
+  border-color: var(--border-color) !important;
+}
+
+/* ==========================================
+   LIGHT THEME - TEXT
+========================================== */
+
+[data-theme="light"] [class~="text-white"] {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="light"] [class~="text-gray-300"],
+[data-theme="light"] [class~="text-gray-400"] {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="light"] [class~="text-gray-500"],
+[data-theme="light"] [class~="text-gray-600"] {
+  color: var(--text-muted) !important;
+}
+
+/* Keep orange branding */
+
+[data-theme="light"] .text-orange-400,
+[data-theme="light"] .text-orange-500 {
+  color: #ea580c !important;
+}
+
+/* ==========================================
+   LIGHT THEME - HEADER AND SIDEBAR
+========================================== */
+
+[data-theme="light"] header,
+[data-theme="light"] aside {
+  background-color: #ffffff !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="light"] .backdrop-blur {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* ==========================================
+   LIGHT THEME - CARDS
+========================================== */
+
+[data-theme="light"] .rounded-xl,
+[data-theme="light"] .rounded-2xl {
+  border-color: var(--border-color);
+}
+
+/* Replace dark gradient cards with clean surfaces */
+
+[data-theme="light"] [class*="bg-gradient-to-"] {
+  background-image: none !important;
+  background-color: #ffffff !important;
+}
+
+/* ==========================================
+   LIGHT THEME - BUTTONS
+========================================== */
+
+/* Preserve orange primary buttons */
+
+[data-theme="light"] button[class*="bg-orange-"],
+[data-theme="light"] a[class*="bg-orange-"] {
+  color: #ffffff;
+}
+
+/* Secondary buttons */
+
+[data-theme="light"] button:not([class*="bg-orange-"]):not(:disabled) {
+  transition: background-color 0.2s ease;
+}
+
+/* ==========================================
+   LIGHT THEME - INPUTS
+========================================== */
+
+[data-theme="light"] input:not(.typing-input),
+[data-theme="light"] select,
+[data-theme="light"] textarea:not(.typing-input) {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  border-color: #cbd5e1 !important;
+}
+
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder {
+  color: #94a3b8;
+}
+
+/* ==========================================
+   TYPING EDITOR
+========================================== */
+
+.typing-editor {
+  position: relative;
+  background-color: var(--editor-bg);
+  color: var(--text-primary);
+}
+
+.typing-code {
+  color: var(--editor-text);
+
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+
+  pointer-events: none;
+}
+
+/* Transparent input overlay */
+
+.typing-input {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  resize: none;
+
+  background: transparent !important;
+  background-color: transparent !important;
+
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+
+  caret-color: transparent !important;
+
+  border: 0;
+  outline: none;
+
+  font: inherit;
+  line-height: inherit;
+
+  overflow: hidden;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+
+  z-index: 2;
+}
+
+/* Editor theme */
+
+[data-theme="light"] .typing-editor {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+[data-theme="light"] .typing-code {
+  color: #334155 !important;
+}
+
+/* Never turn typing overlay white */
+
+[data-theme="light"] .typing-input {
+  background: transparent !important;
+  background-color: transparent !important;
+
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+
+  caret-color: transparent !important;
+}
+
+/* ==========================================
+   DASHBOARD
+========================================== */
+
+.dashboard-content {
+  min-width: 0;
+  scrollbar-gutter: stable;
+}
+
+/* ==========================================
+   SCROLLBARS
+========================================== */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #f97316;
+}
+
+/* ==========================================
+   RESPONSIVE DESIGN
+========================================== */
+
+@supports (height: 100dvh) {
+  #root {
+    min-height: 100dvh;
+  }
+}
+
+/* Touch interactions */
+
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+/* Mobile */
+
+@media (max-width: 640px) {
+  body {
+    font-size: 14px;
+  }
+
+  input,
+  textarea,
+  select {
+    max-width: 100%;
+    font-size: 16px;
+  }
+
+  img,
+  canvas,
+  video {
+    max-width: 100%;
+  }
+
+  .dashboard-content {
+    padding: 1rem;
+  }
+}
+
+/* Tablet */
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .dashboard-content {
+    padding: 1.25rem;
+  }
+}
+
+/* ==========================================
+   ACCESSIBILITY
+========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
