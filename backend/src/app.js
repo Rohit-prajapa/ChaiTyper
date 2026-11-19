@@ -8,15 +8,19 @@ import sessionRouter from "./routes/session.routes.js";
 
 const app = express();
 
+// Trust Render's reverse proxy
+app.set("trust proxy", 1);
+
 // CORS configuration
 const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
   .split(",")
-  .map((origin) => origin.trim());
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests without an Origin header (e.g. Postman)
+      // Allow requests without Origin (e.g. server-to-server/Postman)
       if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
@@ -24,6 +28,24 @@ app.use(
       return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
+
+// Handle preflight requests
+app.options(
+  /.*/,
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
 
@@ -54,7 +76,7 @@ app.use((req, res) => {
   });
 });
 
-// Error handler
+// Central error handler
 app.use((err, req, res, next) => {
   console.error("API Error:", err.message);
 
@@ -62,12 +84,11 @@ app.use((err, req, res, next) => {
     return next(err);
   }
 
-  return res.status(err.message === "Not allowed by CORS" ? 403 : 500).json({
+  const isCorsError = err.message === "Not allowed by CORS";
+
+  return res.status(isCorsError ? 403 : 500).json({
     success: false,
-    message:
-      err.message === "Not allowed by CORS"
-        ? "Origin not allowed"
-        : "Internal server error",
+    message: isCorsError ? "Origin not allowed" : "Internal server error",
   });
 });
 
