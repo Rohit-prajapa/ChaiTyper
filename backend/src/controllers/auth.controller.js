@@ -1,12 +1,25 @@
 import User from "../models/user.model.js";
 
+// Cookie configuration for localhost and production
+const isProduction = process.env.NODE_ENV === "production";
+
+const cookieOptions = {
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax",
+  path: "/",
+};
+
+const accessTokenCookieOptions = {
+  ...cookieOptions,
+  maxAge: 24 * 60 * 60 * 1000,
+};
 
 // REGISTER USER
 const registerUser = async (req, res) => {
   try {
     const { fullName, username, email, password } = req.body;
 
-    // Check required fields
     if (!fullName?.trim() || !username?.trim() || !email?.trim() || !password) {
       return res.status(400).json({
         success: false,
@@ -14,16 +27,16 @@ const registerUser = async (req, res) => {
       });
     }
 
-    // Validate full name
-    if (fullName.trim().length < 3) {
+    const normalizedFullName = fullName.trim();
+    const normalizedUsername = username.trim().toLowerCase();
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (normalizedFullName.length < 3 || normalizedFullName.length > 50) {
       return res.status(400).json({
         success: false,
-        message: "Full name must contain at least 3 characters",
+        message: "Full name must contain 3-50 characters",
       });
     }
-
-    // Validate username
-    const normalizedUsername = username.trim().toLowerCase();
 
     if (!/^[a-z0-9_]{3,20}$/.test(normalizedUsername)) {
       return res.status(400).json({
@@ -33,9 +46,6 @@ const registerUser = async (req, res) => {
       });
     }
 
-    // Validate email
-    const normalizedEmail = email.trim().toLowerCase();
-
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
       return res.status(400).json({
         success: false,
@@ -43,7 +53,6 @@ const registerUser = async (req, res) => {
       });
     }
 
-    // Validate password
     if (password.length < 8) {
       return res.status(400).json({
         success: false,
@@ -51,7 +60,6 @@ const registerUser = async (req, res) => {
       });
     }
 
-    // Check existing user
     const existingUser = await User.findOne({
       $or: [{ email: normalizedEmail }, { username: normalizedUsername }],
     });
@@ -66,28 +74,18 @@ const registerUser = async (req, res) => {
       });
     }
 
-    // Create user
     const user = await User.create({
-      fullName: fullName.trim(),
+      fullName: normalizedFullName,
       username: normalizedUsername,
       email: normalizedEmail,
       password,
     });
 
-    // Generate access token
     const accessToken = user.generateAccessToken();
 
-    const cookieOptions = {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 24 * 60 * 60 * 1000,
-    };
-
-    // Send response
     return res
       .status(201)
-      .cookie("accessToken", accessToken, cookieOptions)
+      .cookie("accessToken", accessToken, accessTokenCookieOptions)
       .json({
         success: true,
         message: "User registered successfully",
@@ -102,7 +100,6 @@ const registerUser = async (req, res) => {
   } catch (error) {
     console.error("Registration Error:", error);
 
-    // Handle duplicate-key errors from MongoDB
     if (error.code === 11000) {
       return res.status(409).json({
         success: false,
@@ -117,11 +114,11 @@ const registerUser = async (req, res) => {
   }
 };
 
+// LOGIN USER
 const loginUser = async (req, res) => {
   try {
     const { email, username, password } = req.body;
 
-    // Validate input
     if ((!email && !username) || !password) {
       return res.status(400).json({
         success: false,
@@ -129,12 +126,22 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // Find user by email or username
+    const conditions = [];
+
+    if (email) {
+      conditions.push({
+        email: email.trim().toLowerCase(),
+      });
+    }
+
+    if (username) {
+      conditions.push({
+        username: username.trim().toLowerCase(),
+      });
+    }
+
     const user = await User.findOne({
-      $or: [
-        ...(email ? [{ email: email.trim().toLowerCase() }] : []),
-        ...(username ? [{ username: username.trim().toLowerCase() }] : []),
-      ],
+      $or: conditions,
     }).select("+password");
 
     if (!user) {
@@ -144,7 +151,6 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // Verify password
     const isPasswordValid = await user.isPasswordCorrect(password);
 
     if (!isPasswordValid) {
@@ -154,20 +160,11 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // Generate JWT
     const accessToken = user.generateAccessToken();
 
-    const cookieOptions = {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 24 * 60 * 60 * 1000,
-    };
-
-    // Send response
     return res
       .status(200)
-      .cookie("accessToken", accessToken, cookieOptions)
+      .cookie("accessToken", accessToken, accessTokenCookieOptions)
       .json({
         success: true,
         message: "User logged in successfully",
@@ -189,18 +186,17 @@ const loginUser = async (req, res) => {
   }
 };
 
+// LOGOUT USER
 const logoutUser = async (req, res) => {
   try {
-    const cookieOptions = {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-    };
-
-    return res.status(200).clearCookie("accessToken", cookieOptions).json({
-      success: true,
-      message: "User logged out successfully",
-    });
+    return res
+      .status(200)
+      .clearCookie("accessToken", cookieOptions)
+      .clearCookie("refreshToken", cookieOptions)
+      .json({
+        success: true,
+        message: "User logged out successfully",
+      });
   } catch (error) {
     console.error("Logout Error:", error);
 
@@ -211,12 +207,11 @@ const logoutUser = async (req, res) => {
   }
 };
 
-
+// UPDATE PROFILE
 const updateProfile = async (req, res) => {
   try {
     const { fullName, username } = req.body;
 
-    // Validate input
     if (!fullName?.trim() || !username?.trim()) {
       return res.status(400).json({
         success: false,
@@ -224,10 +219,9 @@ const updateProfile = async (req, res) => {
       });
     }
 
-    const normalizedUsername = username.trim().toLowerCase();
     const normalizedFullName = fullName.trim();
+    const normalizedUsername = username.trim().toLowerCase();
 
-    // Validate full name
     if (normalizedFullName.length < 3 || normalizedFullName.length > 50) {
       return res.status(400).json({
         success: false,
@@ -235,15 +229,14 @@ const updateProfile = async (req, res) => {
       });
     }
 
-    // Validate username
     if (!/^[a-z0-9_]{3,20}$/.test(normalizedUsername)) {
       return res.status(400).json({
         success: false,
-        message: "Username must be 3-20 characters and contain only letters, numbers or underscores",
+        message:
+          "Username must be 3-20 characters and contain only letters, numbers or underscores",
       });
     }
 
-    // Check whether another user already has this username
     const existingUser = await User.findOne({
       username: normalizedUsername,
       _id: { $ne: req.user._id },
@@ -256,7 +249,6 @@ const updateProfile = async (req, res) => {
       });
     }
 
-    // Update logged-in user's profile
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
       {
@@ -268,7 +260,7 @@ const updateProfile = async (req, res) => {
       {
         new: true,
         runValidators: true,
-      }
+      },
     ).select("-password -refreshToken");
 
     if (!updatedUser) {
@@ -289,7 +281,6 @@ const updateProfile = async (req, res) => {
         avatar: updatedUser.avatar,
       },
     });
-
   } catch (error) {
     console.error("Update Profile Error:", error);
 
@@ -307,6 +298,4 @@ const updateProfile = async (req, res) => {
   }
 };
 
-
-
-export { registerUser, loginUser, logoutUser,updateProfile  };
+export { registerUser, loginUser, logoutUser, updateProfile };
